@@ -19,7 +19,7 @@ function validate($reviews)
     $errors = [];
     // 書籍名がちゃんと入力されているかチェック
     if (!mb_strlen($reviews['title'])) {
-        $errors['title'] = '書籍名を入力してください';
+        $errors['title'] = 'Error:書籍名を入力してください';
     } elseif (mb_strlen($reviews['title'])>255) {
         $errors['title'] = '書籍名は255文字以内で入力してください';
     }
