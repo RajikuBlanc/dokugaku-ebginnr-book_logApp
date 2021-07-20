@@ -9,3 +9,8 @@ CREATE TABLE reviews(
      text VARCHAR(1000) NOT NULL,
      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) DEFAULT CHARACTER SET = utf8mb4;
+
+INSERT INTO
+     reviews(title, name, text)
+VALUES
+     ('hello', 'world', 'testtest');

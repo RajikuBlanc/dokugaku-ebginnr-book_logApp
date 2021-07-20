@@ -14,34 +14,73 @@ function dbConect()
     return $link;
 }
 
-
-function createReview()
+function validate($reviews)
 {
+    $errors = [];
+    // 書籍名がちゃんと入力されているかチェック
+    if (!mb_strlen($reviews['title'])) {
+        $errors['title'] = '書籍名を入力してください';
+    } elseif (mb_strlen($reviews['title'])>255) {
+        $errors['title'] = '書籍名は255文字以内で入力してください';
+    }
+
+    return $errors;
+}
+
+function createReview($link)
+{
+    $reviews = [];
     echo '読書ログを登録してください' . PHP_EOL;
 
     echo '書籍名:';
-    $title = trim(fgets(STDIN));
+    $reviews['title'] = trim(fgets(STDIN));
 
     echo '著者名:';
-    $name = trim(fgets(STDIN));
+    $reviews['name'] = trim(fgets(STDIN));
 
     echo '読書状況（未読,読んでる,読了）:';
-    $status = trim(fgets(STDIN));
+    $reviews['status'] = trim(fgets(STDIN));
 
     echo '評価:';
-    $lank = trim(fgets(STDIN));
+    $reviews['lank'] = trim(fgets(STDIN));
 
     echo '感想:';
-    $text = trim(fgets(STDIN));
+    $reviews['text'] = trim(fgets(STDIN));
 
-    echo '登録が完了しました。' . PHP_EOL . PHP_EOL;
-    return [
-        'title' => $title,
-        'name' => $name,
-        'status' => $status,
-        'lank' => $lank,
-        'text' => $text,
-    ];
+
+    $validated = validate($reviews);
+
+    if (count($validated) > 0) {
+        foreach ($validated as $error) {
+            echo $error . PHP_EOL;
+        }
+        // returnを書くことで処理を止める
+        // returnを書かなければ、エラーが出たとしても処理が止まらないので、データベースに保存されてしまう
+        return;
+    }
+
+
+
+    $sql = <<<EOT
+        INSERT INTO reviews(
+            title, name, status, lank, text
+            )
+            VALUES(
+                "{$reviews['title']}",
+                "{$reviews['name']}",
+                "{$reviews['status']}",
+                "{$reviews['lank']}",
+                "{$reviews['text']}"
+            );
+    EOT;
+
+    $result = mysqli_query($link, $sql);
+    if ($result) {
+        echo '登録が完了しました。' . PHP_EOL;
+    } else {
+        echo 'ERROR:データの保存に失敗しました' . PHP_EOL;
+        echo 'Debbuging Error:' . mysqli_error($link) . PHP_EOL . PHP_EOL;
+    }
 }
 
 function listReview($reviews)
@@ -68,7 +107,7 @@ while (true) {
     $num = trim(fgets(STDIN));
 
     if ($num === '1') {
-        $reviews[] = createReview();
+        createReview($link);
     } elseif ($num === '2') {
         listReview($reviews);
     } elseif ($num === '9') {
